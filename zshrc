@@ -86,7 +86,18 @@ case $TERM in
     ;;
 esac
 
+# -------------------
 # Aliases
+# -------------------
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 alias ttime='/usr/bin/time'
+
+# -------------------
+# TMUX setup
+# -------------------
+
+if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
+  exec tmux
+fi
+
