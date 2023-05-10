@@ -4,20 +4,57 @@
 autoload -Uz colors && colors
 colors
 
+autoload -U add-zsh-hook
+add-zsh-hook chpwd chpwd_git_get_users
+
+__PWD=""
+function chpwd_git_get_users() {
+  __GLOBAL_GIT_USER="`git config --global user.name` <`git config user.email`>"
+  __CURRENT_GIT_USER="`git config user.name` <`git config user.email`>"
+  if [[ -e ./.git ]]; then
+    if [[ "$__PWD" == "" ]] || [[ "$__PWD" != "$PWD" ]]; then
+      __PWD=$PWD;
+      echo "$fg[yellow]Global git user:$reset_color" \
+          "$fg_bold[red]$__GLOBAL_GIT_USER$reset_color";
+      echo "$fg[yellow]Current git user:$reset_color" \
+          "$fg_bold[red]$__CURRENT_GIT_USER$reset_color";
+    fi
+  fi
+}
+
+# -------------------
+# Prompt
+# -------------------
+
+# Allow for functions in the prompt.
+setopt PROMPT_SUBST
 
 PS1="%{$fg_bold[cyan]%}﹝%{$reset_color%}%{$fg_bold[blue]%}%~%{$reset_color%}%{$fg_bold[cyan]%}﹞%{$reset_color%}%{$fg_bold[white]%}▹%{$reset_color%}%{$fg[red]%}▷ "
-RPROMPT="⚫%{$reset_color%}%{$bg[black]%}%{$fg[white]%}%M%{$reset_color%}"
+RPROMPT="⚫%{$reset_color%}%{$bg[black]%}%{$fg_bold[white]%}%m%{$reset_color%}"
+
 
 # -------------------
 # Set optinons
 # -------------------
-setopt histignorealldups sharehistory menucomplete correctall
+setopt sharehistory menucomplete correctall
+setopt correct                                                  # Auto correct mistakes
+setopt extendedglob                                             # Extended globbing. Allows using regular expressions with *
+setopt nocaseglob                                               # Case insensitive globbing
+setopt rcexpandparam                                            # Array expension with parameters
+setopt nocheckjobs                                              # Don't warn about running processes when exiting
+setopt numericglobsort                                          # Sort filenames numerically when it makes sense
+setopt nobeep                                                   # No beep
+setopt appendhistory                                            # Immediately append history instead of overwriting
+setopt histignorealldups                                        # If a new command is a duplicate, remove the older one
+setopt autocd                                                   # if only directory path is entered, cd there.
+setopt inc_append_history                                       # save commands are added to the history immediately, otherwise only when shell exits.
+setopt histignorespace                                          # Don't save commands that start with space
+
 
 # -------------------
 # Use emacs keybindings even if our EDITOR is set to vi
 # -------------------
 bindkey -e
-
 
 # -------------------
 # Keep 500 lines of history within the shell and save it to ~/.zsh_history:
@@ -52,15 +89,13 @@ zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 # -------------------
 autoload -U run-help
 autoload run-help-git
-autoload run-help-svn
-autoload run-help-svk
-alias help=run-help
 
 
 # -------------------
 # Exports
 # -------------------
 export EDITOR="vim"
+export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
 
 
 # -------------------
@@ -92,12 +127,27 @@ esac
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 alias ttime='/usr/bin/time'
+alias help='run-help'
+alias ip='ip --color=auto'
+alias pacman='pacman --color=auto'
+
 
 # -------------------
 # TMUX setup
 # -------------------
 
 if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
-  exec tmux
+  tmux
 fi
 
+
+# -------------------
+# Plugins
+# -------------------
+# Use syntax highlighting
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# Use history substring search
+source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+# Use autosuggesions
+source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+zmodload zsh/terminfo
