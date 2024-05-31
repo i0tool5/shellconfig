@@ -26,8 +26,6 @@ function chpwd_git_get_users() {
 # Prompt
 # -------------------
 
-# Allow for functions in the prompt.
-setopt PROMPT_SUBST
 
 PS1="%{$fg_bold[cyan]%}﹝%{$reset_color%}%{$fg_bold[blue]%}%~%{$reset_color%}%{$fg_bold[cyan]%}﹞%{$reset_color%}%{$fg_bold[white]%}▹%{$reset_color%}%{$fg[red]%}▷ "
 RPROMPT="⚫%{$reset_color%}%{$bg[black]%}%{$fg_bold[white]%}%m%{$reset_color%}"
@@ -49,6 +47,33 @@ setopt histignorealldups                                        # If a new comma
 setopt autocd                                                   # if only directory path is entered, cd there.
 setopt inc_append_history                                       # save commands are added to the history immediately, otherwise only when shell exits.
 setopt histignorespace                                          # Don't save commands that start with space
+setopt PROMPT_SUBST                                             # Allow for functions in the prompt.
+
+# -------------------
+# Use modern completion system
+# -------------------
+fpath+=$HOME/.zfunc
+
+autoload -U compinit && compinit
+
+zstyle ':completion:*' auto-description 'specify: %d'
+zstyle ':completion:*:warnings' format '%BSorry, no matches for: %d%b'
+zstyle ':completion:*' format 'Completing %d'
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' menu select=1 _complete _ignored _approximate _correct
+eval "$(dircolors -b)"
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' list-colors ''
+zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
+zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*' # Case insensitive tab completion
+zstyle ':completion:*' verbose true
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+
+# Speed up completions 
+zstyle ':completion:*' accept-exact '*(N)'
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zsh/cache 
 
 
 # -------------------
@@ -65,26 +90,6 @@ HISTFILE=~/.zsh_history
 
 
 # -------------------
-# Use modern completion system
-# -------------------
-autoload -U compinit && compinit
-
-zstyle ':completion:*' auto-description 'specify: %d'
-zstyle ':completion:*:warnings' format '%BSorry, no matches for: %d%b'
-zstyle ':completion:*' format 'Completing %d'
-zstyle ':completion:*' group-name ''
-zstyle ':completion:*' menu select=1 _complete _ignored _approximate _correct
-eval "$(dircolors -b)"
-zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-zstyle ':completion:*' list-colors ''
-zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
-zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
-zstyle ':completion:*' verbose true
-zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
-zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
-
-
-# -------------------
 # Help command
 # -------------------
 autoload -U run-help
@@ -95,7 +100,7 @@ autoload run-help-git
 # Exports
 # -------------------
 export EDITOR="vim"
-export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
+export PATH=$PATH:/usr/sbin:/usr/local/go/bin:$HOME/go/bin
 
 
 # -------------------
@@ -145,9 +150,10 @@ fi
 # Plugins
 # -------------------
 # Use syntax highlighting
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # Use history substring search
-source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+source /usr/share/zsh-history-substring-search/zsh-history-substring-search.zsh
 # Use autosuggesions
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 zmodload zsh/terminfo
+
